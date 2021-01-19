@@ -6,3 +6,4 @@ tensorboardX>=2.0
 advex-uar>=0.0.5.dev0
 git+git://github.com/fra31/auto-attack#egg=autoattack
 recoloradv==0.0.1
+git+https://github.com/numpy/numpy-stubs#egg=numpy-stubs
