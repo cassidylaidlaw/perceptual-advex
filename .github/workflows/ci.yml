@@ -34,5 +34,5 @@ jobs:
           pip install mypy
 
       - name: Check types
-        run: mypy perceptual_advex/*.py *.py bapps/*.py mturk/*.py
+        run: mypy perceptual_advex/*.py *.py
         if: ${{ always() }}
