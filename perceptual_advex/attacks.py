@@ -361,7 +361,14 @@ class AutoAttack(nn.Module):
         # Necessary to initialize attack here because for parallelization
         # across multiple GPUs.
         if self.attack is None:
-            import autoattack
+            try:
+                import autoattack
+            except ImportError:
+                raise RuntimeError(
+                    'Error: unable to import autoattack. Please install the '
+                    'package by running '
+                    '"pip install git+git://github.com/fra31/auto-attack#egg=autoattack".'
+                )
             self.attack = autoattack.AutoAttack(
                 self.model, device=inputs.device, **self.kwargs)
 

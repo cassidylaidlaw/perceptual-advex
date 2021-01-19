@@ -7,7 +7,6 @@ import torchvision.models as torchvision_models
 from torch.autograd import Variable
 from math import exp
 from torch import nn
-from pytorch_wavelets import DTCWTForward
 from typing_extensions import Literal
 
 from .models import AlexNetFeatureModel, FeatureModel
@@ -24,7 +23,7 @@ class LPIPSDistance(nn.Module):
     def __init__(
         self,
         model: Optional[Union[FeatureModel, nn.DataParallel]] = None,
-        activation_distance: Literal['l2', 'cw_ssim'] = 'l2',
+        activation_distance: Literal['l2'] = 'l2',
         include_image_as_activation: bool = False,
     ):
         """
@@ -63,18 +62,9 @@ class LPIPSDistance(nn.Module):
                 normalize_flatten_features(features1) -
                 normalize_flatten_features(features2)
             ).norm(dim=1)
-        elif self.activation_distance == 'cw_ssim':
-            distance: torch.Tensor = torch.zeros_like(image1[:, 0, 0, 0])
-            for layer1, layer2 in zip(features1, features2):
-                size = min(layer1.size()[2:3])
-                cw_ssim_level = min(1, np.floor(np.log2(size)))
-                distance += CosineWaveletSSIM(
-                    level=cw_ssim_level,
-                    window_size=1,
-                    dissimilarity=True,
-                )(layer1, layer2)
-            distance = distance / len(features1)
-            return distance
+        else:
+            raise ValueError(
+                f'Invalid activation_distance "{self.activation_distance}"')
 
 
 class LinearizedLPIPSDistance(LPIPSDistance):
@@ -198,91 +188,6 @@ class SSIM(nn.Module):
             for img1, img2 in zip(imgs1, imgs2)
         ])
         return 1 - sim if self.dissimilarity else sim
-
-
-class CosineWaveletSSIM(nn.Module):
-    """
-    Calculates the Cosine Wavelet Structural Similarity Index (CW-SSWIM)
-    between two images; see
-    https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=5109651
-    Code adapted from MatLab implementation at
-    https://www.mathworks.com/matlabcentral/fileexchange/43017-complex-wavelet-structural-similarity-index-cw-ssim
-    """
-
-    def __init__(self, level=6, window_size=7, K=1e-8, dissimilarity=False):
-        self.level = level
-        self.window_size = window_size
-        self.K = K
-        self.cw_transform = DTCWTForward(J=level, biort='near_sym_b',
-                                         qshift='qshift_b')
-        self.dissimilarity = dissimilarity
-
-    def _construct_gaussian_kernel(self, width, height, sigma):
-        x_grid = torch.arange(width).repeat(height) \
-            .view(width, height).float()
-        y_grid = torch.arange(height).repeat(width).t() \
-            .view(width, height).float()
-
-        x_mean = (width - 1) / 2
-        y_mean = (height - 1) / 2
-        variance = sigma ** 2
-
-        gaussian_kernel = (1 / (2 * np.pi * variance)) * torch.exp(
-                              -((x_grid - x_mean) ** 2 +
-                                (y_grid - y_mean) ** 2) /
-                              (2*variance)
-                          )
-
-        return gaussian_kernel / torch.sum(gaussian_kernel)
-
-    def forward(self, image1, image2):
-        _, pyr1 = self.cw_transform(image1)
-        _, pyr2 = self.cw_transform(image2)
-
-        bands1 = pyr1[-1]
-        bands2 = pyr2[-1]
-        num_images, num_channels, num_bands, width, height = bands1.size()[:5]
-        width_band = width - self.window_size + 1
-        height_band = height - self.window_size + 1
-
-        # corr is complex and equals bands1 * conjugate(bands2)
-        corr = torch.zeros_like(bands1)
-        corr[..., 0] += bands1[..., 0] * bands2[..., 0]
-        corr[..., 0] += bands1[..., 1] * bands2[..., 1]
-        corr[..., 1] += bands1[..., 1] * bands2[..., 0]
-        corr[..., 1] -= bands1[..., 0] * bands2[..., 1]
-
-        # varr is real-valued and equals abs(bands1)^2 + abs(bands2)^2
-        varr = (bands1[..., 0] ** 2 + bands1[..., 1] ** 2 +
-                bands2[..., 0] ** 2 + bands2[..., 1] ** 2)
-
-        corr = corr.permute(0, 1, 2, 5, 3, 4) \
-            .reshape((num_images, -1, width, height))
-        corr_band = F.avg_pool2d(corr, self.window_size, stride=1)
-        corr_band = corr_band \
-            .reshape((num_images, num_channels, num_bands,
-                      2, width_band, height_band)) \
-            .permute(0, 1, 2, 4, 5, 3)
-
-        varr = varr.reshape((num_images, -1, width, height))
-        varr_band = F.avg_pool2d(varr, self.window_size, stride=1)
-        varr_band = varr_band \
-            .reshape((num_images, num_channels, num_bands,
-                      width_band, height_band))
-
-        abs_corr_band = torch.sqrt(corr_band[..., 0] ** 2 +
-                                   corr_band[..., 1] ** 2)
-        cssim_map = (2 * abs_corr_band + self.K) / (varr_band + self.K)
-
-        weight = self._construct_gaussian_kernel(
-            width_band, height_band, (width_band + height_band) / 8)
-        cw_ssim = torch.sum(cssim_map.mean(dim=[1, 2]) * weight[None],
-                            dim=[1, 2])
-
-        if self.dissimilarity:
-            return 1 - cw_ssim
-        else:
-            return cw_ssim
 
 
 class L2Distance(nn.Module):

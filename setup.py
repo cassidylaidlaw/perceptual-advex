@@ -17,11 +17,9 @@ setup(
         'robustness>=1.1.post2',
         'numpy>=1.18.2',
         'torchvision>=0.5.0',
-        'git+git://github.com/fbcotter/pytorch_wavelets.git#egg=pytorch-wavelets',
         'PyWavelets>=1.0.0',
         'advex-uar>=0.0.5.dev0',
         'statsmodels==0.11.1',
-        'git+git://github.com/fra31/auto-attack#egg=autoattack',
         'recoloradv==0.0.1',
     ],
     classifiers=[
