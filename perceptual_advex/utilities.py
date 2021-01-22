@@ -62,10 +62,10 @@ def add_dataset_model_arguments(parser, include_checkpoint=False):
 
 def get_dataset_model(
     args=None,
-    dataset: Optional[str] = None,
     dataset_path: Optional[str] = None,
     arch: Optional[str] = None,
     checkpoint_fname: Optional[str] = None,
+    **kwargs,
 ) -> Tuple[DataSet, nn.Module]:
     """
     Given an argparse namespace with certain parameters, or those parameters
@@ -80,7 +80,7 @@ def get_dataset_model(
             dataset_path = args.dataset_path
     dataset_path = os.path.expandvars(dataset_path)
 
-    dataset_name = dataset or args.dataset
+    dataset_name = kwargs.get('dataset', args.dataset)
     dataset = DATASETS[dataset_name](dataset_path)
 
     checkpoint_is_feature_model = False
