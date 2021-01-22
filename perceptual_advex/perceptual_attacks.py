@@ -22,13 +22,17 @@ def get_lpips_model(
         Literal['self', 'alexnet', 'alexnet_cifar'],
         FeatureModel,
     ],
-    model: FeatureModel,
+    model: Optional[FeatureModel] = None,
 ) -> FeatureModel:
     global _cached_alexnet, _cached_alexnet_cifar
 
     lpips_model: FeatureModel
 
     if lpips_model_spec == 'self':
+        if model is None:
+            raise ValueError(
+                'Specified "self" for LPIPS model but no model passed'
+            )
         return model
     elif lpips_model_spec == 'alexnet':
         if _cached_alexnet is None:
