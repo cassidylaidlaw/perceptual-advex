@@ -1,6 +1,7 @@
 from typing import Optional, Union
 import torch
 import torchvision.models as torchvision_models
+from torchvision.models.utils import load_state_dict_from_url
 import math
 from torch import nn
 from torch.nn import functional as F
@@ -43,7 +44,14 @@ def get_lpips_model(
         lpips_model = _cached_alexnet_cifar
         if torch.cuda.is_available():
             lpips_model.cuda()
-        state = torch.load('data/checkpoints/alexnet_cifar.pt')
+        try:
+            state = torch.load('data/checkpoints/alexnet_cifar.pt')
+        except FileNotFoundError:
+            state = load_state_dict_from_url(
+                'https://perceptual-advex.s3.us-east-2.amazonaws.com/'
+                'alexnet_cifar.pt',
+                progress=True,
+            )
         lpips_model.load_state_dict(state['model'])
     elif isinstance(lpips_model_spec, str):
         raise ValueError(f'Invalid LPIPS model "{lpips_model_spec}"')
