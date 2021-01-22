@@ -2,4 +2,5 @@
 *.prof
 *.png
 *.txt
+*.pyc
 data
