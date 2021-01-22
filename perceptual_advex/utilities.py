@@ -61,26 +61,37 @@ def add_dataset_model_arguments(parser, include_checkpoint=False):
 
 
 def get_dataset_model(
-    args,
+    args=None,
+    dataset: Optional[str] = None,
+    dataset_path: Optional[str] = None,
+    arch: Optional[str] = None,
     checkpoint_fname: Optional[str] = None,
 ) -> Tuple[DataSet, nn.Module]:
     """
-    Given an argparse namespace with certain parameters, returns a tuple
-    (dataset, model) with a robustness dataset and a FeatureModel.
+    Given an argparse namespace with certain parameters, or those parameters
+    as keyword arguments, returns a tuple (dataset, model) with a robustness
+    dataset and a FeatureModel.
     """
 
-    dataset_path = os.path.expandvars(args.dataset_path)
-    dataset = DATASETS[args.dataset](dataset_path)
+    if dataset_path is None:
+        if args is None:
+            dataset_path = '/scratch1/claidlaw/datasets'
+        else:
+            dataset_path = args.dataset_path
+    dataset_path = os.path.expandvars(dataset_path)
+
+    dataset_name = dataset or args.dataset
+    dataset = DATASETS[dataset_name](dataset_path)
 
     checkpoint_is_feature_model = False
 
     if checkpoint_fname is None:
         checkpoint_fname = getattr(args, 'checkpoint', None)
-
-    arch = args.arch
+    if arch is None:
+        arch = args.arch
 
     if arch.startswith('rob-') or (
-        args.dataset.startswith('cifar') and
+        dataset_name.startswith('cifar') and
         'resnet' in arch
     ):
         if arch.startswith('rob-'):
@@ -123,7 +134,7 @@ def get_dataset_model(
     elif hasattr(torchvision_models, arch):
         if (
             arch == 'alexnet' and
-            args.dataset.startswith('cifar') and
+            dataset_name.startswith('cifar') and
             checkpoint_fname != 'pretrained'
         ):
             model = CifarAlexNet(num_classes=dataset.num_classes)
@@ -153,11 +164,11 @@ def get_dataset_model(
     elif 'resnet' in arch:
         if not isinstance(model, AttackerModel):
             model = AttackerModel(model, dataset)
-        if args.dataset.startswith('cifar'):
+        if dataset_name.startswith('cifar'):
             model = CifarResNetFeatureModel(model)
         elif (
-            args.dataset.startswith('imagenet')
-            or args.dataset == 'bird_or_bicycle'
+            dataset_name.startswith('imagenet')
+            or dataset_name == 'bird_or_bicycle'
         ):
             model = ImageNetResNetFeatureModel(model)
         else:

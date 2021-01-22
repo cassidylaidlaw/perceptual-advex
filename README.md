@@ -2,12 +2,53 @@
 This directory contains code for the paper "Perceptual Adversarial Robustness: Generalizable Defenses Against Unseen Threat Models."
 
 ## Installation
+
+The code can be downloaded as this GitHub repository, which includes the scripts for running all experiments in the paper. Alternatively, it can be installed as a pip package, which includes the models, attacks, and other utilities.
+
+### As a repository
+
 1. Install [Python 3](https://www.python.org/).
+2. Clone the repository:
+
+        git clone https://github.com/cassidylaidlaw/perceptual-advex.git
+        cd perceptual-advex
+
 2. Install pip requirements:
 
-       pip install -r requirements.txt
+        pip install -r requirements.txt
+
+### As a package
+
+1. Install [Python 3](https://www.python.org/).
+2. Install from PyPI:
+    
+        pip install perceptual-advex
+
+3. (Optional) Install AutoAttack if you want to use it with the package:
+
+        pip install git+git://github.com/fra31/auto-attack#egg=autoattack
+
+4. Import the package as follows:
+
+        from perceptual_advex.perceptual_attacks import FastLagrangePerceptualAttack
+
+   See [getting_started.ipynb](getting_started.ipynb) or the Colab notebook below for examples of how to use the package.
+
+## Data and Pretrained Models
+
+Download pretrained models from here: [download](https://perceptual-advex.s3.us-east-2.amazonaws.com/perceptual-advex-checkpoints.zip)
+
+Data download coming soon!
 
 ## Usage
+
+This section explains how to get started with using the code and includes information about how to run all the experiments.
+
+### Getting Started
+
+The [getting_started.ipynb](getting_started.ipynb) notebook shows how to load a pretrained model and construct perceptual adversarial examples for it. It is also available on Google Colab via the link below.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cassidylaidlaw/perceptual-advex/blob/master/getting_started.ipynb)
 
 ### Perceptual Adversarial Training (PAT)
 
@@ -64,3 +105,18 @@ The following command was used to generate Table 3 in the paper, which shows the
     "ReColorAdvAttack(model, bound=0.06, num_iterations=200)" \
     "PerceptualPGDAttack(model, bound=0.5, lpips_model='alexnet', num_iterations=40)" \
     "LagrangePerceptualAttack(model, bound=0.5, lpips_model='alexnet', num_iterations=40)"
+
+## Citation
+
+If you find this repository useful for your research, please cite our paper as follows:
+
+    @inproceedings{laidlaw2021perceptual,
+      title={Perceptual Adversarial Robustness: Defense Against Unseen Threat Models},
+      author={Laidlaw, Cassidy and Singla, Sahil and Feizi, Soheil},
+      booktitle={ICLR},
+      year={2021}
+    }
+
+## Contact
+
+For questions about the paper or code, please contact claidlaw@umd.edu.
