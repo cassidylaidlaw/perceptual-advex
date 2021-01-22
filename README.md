@@ -36,9 +36,9 @@ The code can be downloaded as this GitHub repository, which includes the scripts
 
 ## Data and Pretrained Models
 
-Download pretrained models from here: [download](https://perceptual-advex.s3.us-east-2.amazonaws.com/perceptual-advex-checkpoints.zip)
+Download pretrained models from [here](https://perceptual-advex.s3.us-east-2.amazonaws.com/perceptual-advex-checkpoints.zip).
 
-Data download coming soon!
+Perceptual study data download is coming soon!
 
 ## Usage
 
@@ -94,7 +94,22 @@ The script `evaluate_trained_model.py` evaluates a model against a set of attack
     "PerceptualPGDAttack(model, bound=0.5, num_iterations=40, lpips_model='alexnet')" \
     "LagrangePerceptualAttack(model, bound=0.5, num_iterations=40, lpips_model='alexnet')"
 
-The following command was used to generate Table 3 in the paper, which shows the robustness of various models against several attacks at the medium perceptibility bound:
+#### CIFAR-10
+
+The following command was used to evaluate CIFAR-10 classifiers for Tables 2, 6, 7, 8, and 9 in the paper:
+
+    python evaluate_trained_model.py --dataset cifar --checkpoint /path/to/checkpoint.pt --arch resnet50 --batch_size 100 --output evaluation.csv \
+    "NoAttack()" \
+    "AutoLinfAttack(model, 'cifar', bound=8/255)" \
+    "AutoL2Attack(model, 'cifar', bound=1)" \
+    "StAdvAttack(model, num_iterations=100)" \
+    "ReColorAdvAttack(model, num_iterations=100)" \
+    "PerceptualPGDAttack(model, num_iterations=40, bound=0.5, lpips_model='alexnet_cifar', projection='newtons')" \
+    "LagrangePerceptualAttack(model, num_iterations=40, bound=0.5, lpips_model='alexnet_cifar', projection='newtons')"
+
+#### ImageNet-100
+
+The following command was used to evaluate ImageNet-100 classifiers for Table 3 in the paper, which shows the robustness of various models against several attacks at the medium perceptibility bound:
 
     python evaluate_trained_model.py --dataset imagenet100 --dataset_path /path/to/ILSVRC2012 --checkpoint /path/to/checkpoint.pt --arch resnet50 --batch_size 50 --output evaluation.csv \
     "NoAttack()" \
