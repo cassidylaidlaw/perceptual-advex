@@ -4,7 +4,7 @@ setup(
     packages=[
         'perceptual_advex',
     ],
-    version='0.2',
+    version='0.2.1',
     license='MIT',
     description='Code for the ICLR 2021 paper "Perceptual Adversarial Robustness: Defense Against Unseen Threat Models"',
     author='Cassidy Laidlaw',
