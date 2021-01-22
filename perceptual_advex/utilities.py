@@ -75,7 +75,7 @@ def get_dataset_model(
 
     if dataset_path is None:
         if args is None:
-            dataset_path = '/scratch1/claidlaw/datasets'
+            dataset_path = '~/datasets'
         else:
             dataset_path = args.dataset_path
     dataset_path = os.path.expandvars(dataset_path)
