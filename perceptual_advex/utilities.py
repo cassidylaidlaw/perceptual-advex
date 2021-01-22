@@ -80,7 +80,7 @@ def get_dataset_model(
             dataset_path = args.dataset_path
     dataset_path = os.path.expandvars(dataset_path)
 
-    dataset_name = kwargs.get('dataset', args.dataset)
+    dataset_name = kwargs.get('dataset') or args.dataset
     dataset = DATASETS[dataset_name](dataset_path)
 
     checkpoint_is_feature_model = False
