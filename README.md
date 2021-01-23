@@ -1,5 +1,5 @@
 # Perceptual Aversarial Robustness
-This repository contains code for the ICLR 2021 paper ["Perceptual Adversarial Robustness: Generalizable Defenses Against Unseen Threat Models"](https://arxiv.org/abs/2006.12655).
+This repository contains code and data for the ICLR 2021 paper ["Perceptual Adversarial Robustness: Defense Against Unseen Threat Models"](https://arxiv.org/abs/2006.12655).
 
 ## Installation
 
