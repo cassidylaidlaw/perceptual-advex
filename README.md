@@ -1,5 +1,5 @@
 # Perceptual Aversarial Robustness
-This directory contains code for the paper "Perceptual Adversarial Robustness: Generalizable Defenses Against Unseen Threat Models."
+This repository contains code for the paper ["Perceptual Adversarial Robustness: Generalizable Defenses Against Unseen Threat Models"](https://arxiv.org/abs/2006.12655).
 
 ## Installation
 
