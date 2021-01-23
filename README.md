@@ -38,7 +38,7 @@ The code can be downloaded as this GitHub repository, which includes the scripts
 
 Download pretrained models from [here](https://perceptual-advex.s3.us-east-2.amazonaws.com/perceptual-advex-checkpoints.zip).
 
-Perceptual study data download is coming soon!
+Perceptual study data can be downloaded from [here](https://perceptual-advex.s3.us-east-2.amazonaws.com/perceptual-advex-perceptual-study-data.zip).
 
 ## Usage
 
