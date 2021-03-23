@@ -157,7 +157,7 @@ class FastLagrangePerceptualAttack(nn.Module):
             dist_grads = (
                 adv_features -
                 normalize_flatten_features(self.lpips_model.features(
-                    inputs + perturbations + grad_normed * self.h))
+                    inputs + perturbations - grad_normed * self.h))
             ).norm(dim=1) / 0.1
 
             perturbation_updates = -grad_normed * (
@@ -606,7 +606,7 @@ class LagrangePerceptualAttack(nn.Module):
                 dist_grads = (
                     adv_features -
                     normalize_flatten_features(self.lpips_model.features(
-                        adv_inputs + grad_normed * self.h))
+                        adv_inputs - grad_normed * self.h))
                 ).norm(dim=1) / self.h
 
                 updates = -grad_normed * (
