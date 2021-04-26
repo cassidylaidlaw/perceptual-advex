@@ -265,7 +265,7 @@ class NewtonsPerceptualProjection(nn.Module):
                 inverse_grad
             ).clamp(0, 1).detach()
 
-            needs_projection[needs_projection] = \
+            needs_projection[needs_projection.clone()] = \
                 projection_step_size > 0
             iteration += 1
 
@@ -620,9 +620,9 @@ class LagrangePerceptualAttack(nn.Module):
                 ).detach()
 
                 if self.random_targets:
-                    live[live] = (adv_labels != labels[live]) | (lpips_dists > self.bound)
+                    live[live.clone()] = (adv_labels != labels[live]) | (lpips_dists > self.bound)
                 else:
-                    live[live] = (adv_labels == labels[live]) | (lpips_dists > self.bound)
+                    live[live.clone()] = (adv_labels == labels[live]) | (lpips_dists > self.bound)
                 if live.sum() == 0:
                     break
 
