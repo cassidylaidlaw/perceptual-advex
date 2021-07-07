@@ -6,7 +6,7 @@ import copy
 from typing import List
 
 from torch.hub import load_state_dict_from_url
-from torch.tensor import Tensor
+from torch import Tensor
 from torchvision.models import AlexNet
 from robustness.datasets import DATASETS
 
