@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 import torch
 import torchvision.models as torchvision_models
 from torchvision.models.utils import load_state_dict_from_url
@@ -108,6 +108,15 @@ class FastLagrangePerceptualAttack(nn.Module):
         self.projection = PROJECTIONS[projection](self.bound, self.lpips_model)
         self.loss = MarginLoss(kappa=kappa)
 
+    def _get_features(self, inputs: torch.Tensor) -> torch.Tensor:
+        return normalize_flatten_features(self.lpips_model.features(inputs))
+
+    def _get_features_logits(
+        self, inputs: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        features, logits = self.lpips_model.features_logits(inputs)
+        return normalize_flatten_features(features), logits
+
     def forward(self, inputs, labels):
         perturbations = torch.zeros_like(inputs)
         perturbations.normal_(0, 0.01)
@@ -117,8 +126,7 @@ class FastLagrangePerceptualAttack(nn.Module):
         step_size = self.step
         lam = self.lam
 
-        input_features = normalize_flatten_features(
-            self.lpips_model.features(inputs)).detach()
+        input_features = self._get_features(inputs).detach()
 
         for attack_iter in range(self.num_iterations):
             # Decay step size, but increase lambda over time.
@@ -136,14 +144,13 @@ class FastLagrangePerceptualAttack(nn.Module):
 
             if self.model == self.lpips_model:
                 adv_features, adv_logits = \
-                    self.model.features_logits(adv_inputs)
+                    self._get_features_logits(adv_inputs)
             else:
-                adv_features = self.lpips_model.features(adv_inputs)
+                adv_features = self._get_features(adv_inputs)
                 adv_logits = self.model(adv_inputs)
 
             adv_loss = self.loss(adv_logits, labels)
 
-            adv_features = normalize_flatten_features(adv_features)
             lpips_dists = (adv_features - input_features).norm(dim=1)
 
             loss = -adv_loss + lam * F.relu(lpips_dists - self.bound)
@@ -155,9 +162,8 @@ class FastLagrangePerceptualAttack(nn.Module):
                  [:, None, None, None] + 1e-8)
 
             dist_grads = (
-                adv_features -
-                normalize_flatten_features(self.lpips_model.features(
-                    inputs + perturbations - grad_normed * self.h))
+                adv_features - self._get_features(
+                    inputs + perturbations - grad_normed * self.h)
             ).norm(dim=1) / 0.1
 
             perturbation_updates = -grad_normed * (
