@@ -1,7 +1,7 @@
 from typing import Optional, Tuple, Union
 import torch
 import torchvision.models as torchvision_models
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 import math
 from torch import nn
 from torch.nn import functional as F
